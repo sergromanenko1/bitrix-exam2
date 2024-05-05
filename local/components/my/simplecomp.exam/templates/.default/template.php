@@ -16,6 +16,8 @@ $this->setFrameMode(true);
 <b><?= Loc::getMessage("SUBTITLE") ?></b>
 <ul>
 	<?
+	$productId = 0;
+
 	foreach ($arResult["ELEMENTS"] as $element) {
 		printf(
 			"<li>
@@ -28,10 +30,22 @@ $this->setFrameMode(true);
 		if ($element["PRODUCTS"]) {
 			echo "<ul>";
 			foreach ($element["PRODUCTS"] as $productItem) {
+				$productId++;
+
+				$this->AddEditAction(
+					$productId,
+					$productItem["EDIT_LINK"], 
+					CIBlock::GetArrayByID($arParams["IBLOCK_CATALOG_ID"], "ELEMENT_EDIT")
+				);
+				$this->AddDeleteAction(
+					$productId,
+					$productItem["DELETE_LINK"], 
+					CIBlock::GetArrayByID($arParams["IBLOCK_CATALOG_ID"], "ELEMENT_DELETE")
+				);
+
 				printf(
-					"<li>
-						%s - %s - %s - %s - (%s)
-					</li>",
+					'<li id="%s">%s - %s - %s - %s - (%s)</li>',
+					HtmlFilter::encode($this->GetEditAreaId($productId)),
 					HtmlFilter::encode($productItem["NAME"]),
 					(int) $productItem["PRICE_VALUE"],
 					HtmlFilter::encode($productItem["MATERIAL_VALUE"]),

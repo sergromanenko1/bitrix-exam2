@@ -33,6 +33,14 @@ class Simplecomp3 extends CBitrixComponent
 			$this->includeComponentTemplate();
 		}
 
+		if($APPLICATION->GetShowIncludeAreas()) {
+			$this->addIncludeAreaIcons(
+				CIBlock::GetComponentMenu(
+					$APPLICATION->GetPublicShowMode(),
+					$this->getPanelButtons()
+				)
+			);
+		}
 		$APPLICATION->SetTitle(Loc::getMessage("TITLE") . $this->arResult["COUNT_NEWS"]);
 	}
 
@@ -72,6 +80,15 @@ class Simplecomp3 extends CBitrixComponent
 		return false;
 	}
 
+	protected function getPanelButtons($elementId = 0) {
+		return CIBlock::GetPanelButtons(
+			$this->arParams["NEWS_IBLOCK_ID"],
+			$elementId,
+			0,
+			array("SECTION_BUTTONS" => false, "SESSID" => false)
+		);
+	}
+
 	protected function getAuthors() {
 		$authors = UserTable::getList([
 			"select" => ["ID", "LOGIN", "{$this->arParams['USER_PROPERTY_AUTHOR_TYPE_KEY']}"],
@@ -96,6 +113,7 @@ class Simplecomp3 extends CBitrixComponent
 	protected function getNews($authors) {
 		$news = ElementNewsTable::getList([
 			"select" => [
+				"ID",
 				"NAME",
 				"ACTIVE_FROM",
 				"{$this->arParams['IBLOCK_PROPERTY_AUTHOR_KEY']}_VALUE" => "{$this->arParams['IBLOCK_PROPERTY_AUTHOR_KEY']}.VALUE",
@@ -128,6 +146,13 @@ class Simplecomp3 extends CBitrixComponent
 			return array_intersect($itemNews["AUTHOR_VALUE"], $authorIds) &&
 				!in_array($this->userId, $itemNews["AUTHOR_VALUE"]);
 		});
+
+		foreach ($news as &$newsItem) {
+			$arButtons = $this->getPanelButtons($newsItem["ID"]);
+
+			$newsItem["EDIT_LINK"]   = $arButtons["edit"]["edit_element"]["ACTION_URL"] ?? "";
+			$newsItem["DELETE_LINK"] = $arButtons["edit"]["delete_element"]["ACTION_URL"] ?? "";
+		}
 
 		$this->arResult["COUNT_NEWS"] = count($news);
 

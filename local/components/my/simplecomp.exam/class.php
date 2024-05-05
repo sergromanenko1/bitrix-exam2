@@ -35,6 +35,15 @@ class Simplecomp extends CBitrixComponent
 			$this->setResultCacheKeys(["COUNT", "ELEMENTS"]);
 			$this->includeComponentTemplate();
 		}
+
+		if($APPLICATION->GetShowIncludeAreas()) {
+			$this->addIncludeAreaIcons(
+				CIBlock::GetComponentMenu(
+					$APPLICATION->GetPublicShowMode(),
+					$this->getPanelButtons()
+				)
+			);
+		}
 		$APPLICATION->SetTitle(Loc::GetMessage("TITLE") . $this->arResult["COUNT"]);
 	}
 
@@ -64,6 +73,15 @@ class Simplecomp extends CBitrixComponent
 			}
 		}
 		return false;
+	}
+
+	protected function getPanelButtons($elementId = 0) {
+		return CIBlock::GetPanelButtons(
+			$this->arParams["IBLOCK_CATALOG_ID"],
+			$elementId,
+			0,
+			array("SECTION_BUTTONS" => false, "SESSID" => false)
+		);
 	}
 
 	protected function getProductSections()
@@ -106,6 +124,7 @@ class Simplecomp extends CBitrixComponent
 
 		$products = ElementProductTable::getList([
 			"select" => [
+				"ID",
 				"CODE",
 				"IBLOCK_SECTION_ID",
 				"NAME",
@@ -127,6 +146,10 @@ class Simplecomp extends CBitrixComponent
 		])->fetchAll();
 
 		foreach ($products as &$product) {
+			$arButtons = $this->getPanelButtons($product["ID"]);
+
+			$product["EDIT_LINK"]       = $arButtons["edit"]["edit_element"]["ACTION_URL"] ?? "";
+			$product["DELETE_LINK"]     = $arButtons["edit"]["delete_element"]["ACTION_URL"] ?? "";
 			$product["DETAIL_PAGE_URL"] = CIBlock::ReplaceDetailUrl($this->arParams["DETAIL_PAGE_URL"], $product, false, "E");
 		}
 
@@ -167,13 +190,8 @@ class Simplecomp extends CBitrixComponent
 					}
 				)
 			);
-
-			foreach ($newsItem["PRODUCTS"] as &$product) {
-				unset($product["IBLOCK_SECTION_ID"]);
-			}
 	
 			$newsItem["ACTIVE_FROM"] = $newsItem["ACTIVE_FROM"]->format('d.m.Y');
-			unset($newsItem["ID"]);
 		}
 
 		return $news;

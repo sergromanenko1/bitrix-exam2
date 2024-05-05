@@ -30,6 +30,14 @@ class Simplecomp2 extends CBitrixComponent
 			$this->includeComponentTemplate();
 		}
 
+		if($APPLICATION->GetShowIncludeAreas()) {
+			$this->addIncludeAreaIcons(
+				CIBlock::GetComponentMenu(
+					$APPLICATION->GetPublicShowMode(),
+					$this->getPanelButtons()
+				)
+			);
+		}
 		$APPLICATION->SetTitle(Loc::getMessage('TITLE') . $this->arResult["COUNT"]);
 	}
 
@@ -59,6 +67,15 @@ class Simplecomp2 extends CBitrixComponent
 			}
 		}
 		return false;
+	}
+
+	protected function getPanelButtons($elementId = 0) {
+		return CIBlock::GetPanelButtons(
+			$this->arParams["PROCDUCTS_IBLOCK_ID"],
+			$elementId,
+			0,
+			array("SECTION_BUTTONS" => false, "SESSID" => false)
+		);
 	}
 
 	protected function getItems($params)
@@ -99,6 +116,7 @@ class Simplecomp2 extends CBitrixComponent
 				"!PROPERTY_{$this->arParams['PROPERTY_LINK_KEY']}" => false,
 			],
 			"select" => [
+				"ID",
 				"NAME",
 				"PROPERTY_PRICE",
 				"PROPERTY_MATERIAL",
@@ -107,6 +125,13 @@ class Simplecomp2 extends CBitrixComponent
 				"DETAIL_PAGE_URL",
 			],
 		]);
+
+		foreach ($products as &$product) {
+			$arButtons = $this->getPanelButtons($product["ID"]);
+
+			$product["EDIT_LINK"]   = $arButtons["edit"]["edit_element"]["ACTION_URL"] ?? "";
+			$product["DELETE_LINK"] = $arButtons["edit"]["delete_element"]["ACTION_URL"] ?? "";
+		}
 
 		return $products;
 	}
@@ -139,7 +164,6 @@ class Simplecomp2 extends CBitrixComponent
 					$firm["PRODUCTS"][] = $product;
 				}
 			}
-			unset($firm["ID"]);
 		}
 
 		return $firms;
