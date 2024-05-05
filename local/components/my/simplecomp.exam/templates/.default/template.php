@@ -9,6 +9,10 @@ use Bitrix\Main\Text\HtmlFilter;
 
 $this->setFrameMode(true);
 ?>
+<p>
+	<?= Loc::getMessage("SUBTITLE") ?>: <a href="/ex2/simplecomp/?F=Y">/ex2/simplecomp/?F=Y</a><br>
+	---
+</p>
 <b><?= Loc::getMessage("SUBTITLE") ?></b>
 <ul>
 	<?

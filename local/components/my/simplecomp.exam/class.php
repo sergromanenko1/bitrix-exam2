@@ -6,6 +6,7 @@ use Bitrix\Iblock\Model\Section;
 use Bitrix\Iblock\ElementTable;
 use Bitrix\Iblock\Elements\ElementProductTable;
 use Bitrix\Main\Loader;
+use Bitrix\Main\Context;
 
 class Simplecomp extends CBitrixComponent
 {
@@ -17,7 +18,7 @@ class Simplecomp extends CBitrixComponent
 			return;
 		}
 
-		if($this->startResultCache())
+		if(Context::getCurrent()->getRequest()->get("F") || $this->startResultCache())
 		{
 			try {
 				$productSections = $this->getProductSections();
@@ -85,6 +86,24 @@ class Simplecomp extends CBitrixComponent
 
 	protected function getProducts($productSectionIds)
 	{
+		$additionalFilter = [];
+
+		if (Context::getCurrent()->getRequest()->get("F")) {
+			$additionalFilter = [
+				[
+					"LOGIC" => "OR",
+					[
+						"<=PRICE.VALUE"   => 1700,
+						"=MATERIAL.VALUE" => "Дерево, ткань",
+					],
+					[
+						"<=PRICE.VALUE" => 1500,
+						"=MATERIAL.VALUE" => "Металл, пластик",
+					],
+				]
+			];
+		}
+
 		$products = ElementProductTable::getList([
 			"select" => [
 				"CODE",
@@ -94,10 +113,13 @@ class Simplecomp extends CBitrixComponent
 				"ARTNUMBER_VALUE" => "ARTNUMBER.VALUE",
 				"PRICE_VALUE"     => "PRICE.VALUE",
 			],
-			"filter" => [
-				"=ACTIVE"           => "Y",
-				"=IBLOCK_SECTION_ID" => $productSectionIds,
-			],
+			"filter" => array_merge(
+				$additionalFilter,
+				[
+					"=ACTIVE"            => "Y",
+					"=IBLOCK_SECTION_ID" => $productSectionIds
+				]
+			),
 			"order" => [
 				"NAME" => "ASC",
 				"SORT" => "ASC",
