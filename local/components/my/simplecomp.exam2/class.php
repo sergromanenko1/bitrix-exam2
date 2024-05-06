@@ -30,14 +30,7 @@ class Simplecomp2 extends CBitrixComponent
 			$this->includeComponentTemplate();
 		}
 
-		if($APPLICATION->GetShowIncludeAreas()) {
-			$this->addIncludeAreaIcons(
-				CIBlock::GetComponentMenu(
-					$APPLICATION->GetPublicShowMode(),
-					$this->getPanelButtons()
-				)
-			);
-		}
+		$this->setPanelButtons();
 		$APPLICATION->SetTitle(Loc::getMessage('TITLE') . $this->arResult["COUNT"]);
 	}
 
@@ -76,6 +69,30 @@ class Simplecomp2 extends CBitrixComponent
 			0,
 			array("SECTION_BUTTONS" => false, "SESSID" => false)
 		);
+	}
+
+	protected function setPanelButtons() {
+		global $APPLICATION;
+
+		if ($APPLICATION->GetShowIncludeAreas()) {
+			$buttons = $this->getPanelButtons();
+
+			$this->addIncludeAreaIcons(
+				array_merge(
+					CIBlock::GetComponentMenu(
+						$APPLICATION->GetPublicShowMode(),
+						$this->getPanelButtons()
+					),
+					[
+						[
+							"TITLE"          => Loc::getMessage("PARAMS_MENU_TITLE"),
+							"URL"            => $buttons["submenu"]["element_list"]["ACTION_URL"],
+							"IN_PARAMS_MENU" => true,
+						]
+					]
+				)
+			);
+		}
 	}
 
 	protected function getItems($params)
