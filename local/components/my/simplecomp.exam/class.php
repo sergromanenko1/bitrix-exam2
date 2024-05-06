@@ -24,20 +24,22 @@ class Simplecomp extends CBitrixComponent
 				$productSections = $this->getProductSections();
 				$products        = $this->getProducts(array_column($productSections, "ID"));
 
-				$this->arResult["COUNT"] = count($products);
-				$this->arResult["ELEMENTS"] = $this->getElements($productSections, $products);
+				$this->arResult["COUNT"]       = count($products);
+				$this->arResult["PRICE_RANGE"] = $this->getProductPriceRange($products);
+				$this->arResult["ELEMENTS"]    = $this->getElements($productSections, $products);
 			} catch (Exception) {
 				$this->abortResultCache();
 				ShowError(Loc::getMessage("WRONG_PARAMETERS"));
 				return;
 			}
 
-			$this->setResultCacheKeys(["COUNT", "ELEMENTS"]);
+			$this->setResultCacheKeys(["COUNT", "ELEMENTS", "PRICE_RANGE"]);
 			$this->includeComponentTemplate();
 		}
 
 		$this->setPanelButtons();
 		$APPLICATION->SetTitle(Loc::GetMessage("TITLE") . $this->arResult["COUNT"]);
+		$this->showPriceRange();
 	}
 
 	public function onPrepareComponentParams($arParams)
@@ -173,6 +175,27 @@ class Simplecomp extends CBitrixComponent
 		return $products;
 	}
 
+	protected function getProductPriceRange($products)
+	{
+		$priceRange = [
+			"MIN" => 0,
+			"MAX" => 0,
+		];
+
+		if (!$products) {
+			return $priceRange;
+		}
+
+		$prices =  array_column($products, "PRICE_VALUE");
+
+		$priceRange = [
+			"MIN" => min($prices),
+			"MAX" => max($prices),
+		];
+
+		return $priceRange;
+	}
+
 	protected function getElements($productSections, $products)
 	{
 		$news = [];
@@ -212,5 +235,20 @@ class Simplecomp extends CBitrixComponent
 		}
 
 		return $news;
+	}
+
+	protected function showPriceRange() {
+		global $APPLICATION;
+
+		if (!empty($this->arResult["PRICE_RANGE"]["MAX"]) && !empty($this->arResult["PRICE_RANGE"]["MIN"])) {
+			$APPLICATION->SetPageProperty(
+				"SIMPLECOMP",
+				sprintf(
+					'<div style="color:red; margin: 34px 15px 35px 15px">' . Loc::GetMessage("PRICE_RANGE") .'</div>',
+					(int) $this->arResult["PRICE_RANGE"]["MAX"],
+					(int) $this->arResult["PRICE_RANGE"]["MIN"]
+				),
+			);
+		}
 	}
 }

@@ -18,20 +18,22 @@ class Simplecomp2 extends CBitrixComponent
 			try {
 				$products = $this->getProducts();
 			
-				$this->arResult["ELEMENTS"] = $this->getElements($products);
-				$this->arResult["COUNT"] = count($this->arResult["ELEMENTS"]);
+				$this->arResult["ELEMENTS"]    = $this->getElements($products);
+				$this->arResult["PRICE_RANGE"] = $this->getProductPriceRange($products);
+				$this->arResult["COUNT"]       = count($this->arResult["ELEMENTS"]);
 			} catch (Exception) {
 				$this->abortResultCache();
 				ShowError(Loc::getMessage("WRONG_PARAMETERS"));
 				return;
 			}
 
-			$this->setResultCacheKeys(["COUNT", "ELEMENTS"]);
+			$this->setResultCacheKeys(["COUNT", "ELEMENTS", "PRICE_RANGE"]);
 			$this->includeComponentTemplate();
 		}
 
 		$this->setPanelButtons();
 		$APPLICATION->SetTitle(Loc::getMessage('TITLE') . $this->arResult["COUNT"]);
+		$this->showPriceRange();
 	}
 
 	public function onPrepareComponentParams($arParams)
@@ -153,6 +155,27 @@ class Simplecomp2 extends CBitrixComponent
 		return $products;
 	}
 
+	protected function getProductPriceRange($products)
+	{
+		$priceRange = [
+			"MIN" => 0,
+			"MAX" => 0,
+		];
+
+		if (!$products) {
+			return $priceRange;
+		}
+
+		$prices =  array_column($products, "PROPERTY_PRICE_VALUE");
+
+		$priceRange = [
+			"MIN" => min($prices),
+			"MAX" => max($prices),
+		];
+
+		return $priceRange;
+	}
+
 	protected function getElements($products)
 	{
 		$propertyLinkKey = "PROPERTY_{$this->arParams['PROPERTY_LINK_KEY']}_VALUE";
@@ -184,5 +207,20 @@ class Simplecomp2 extends CBitrixComponent
 		}
 
 		return $firms;
+	}
+
+	protected function showPriceRange() {
+		global $APPLICATION;
+
+		if (!empty($this->arResult["PRICE_RANGE"]["MAX"]) && !empty($this->arResult["PRICE_RANGE"]["MIN"])) {
+			$APPLICATION->SetPageProperty(
+				"SIMPLECOMP2",
+				sprintf(
+					'<div style="color:red; margin: 34px 15px 35px 15px">' . Loc::GetMessage("PRICE_RANGE") .'</div>',
+					(int) $this->arResult["PRICE_RANGE"]["MAX"],
+					(int) $this->arResult["PRICE_RANGE"]["MIN"]
+				),
+			);
+		}
 	}
 }

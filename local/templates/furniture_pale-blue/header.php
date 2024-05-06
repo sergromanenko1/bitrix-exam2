@@ -111,6 +111,10 @@ $APPLICATION->IncludeFile(
 		"ACTIVE_COMPONENT" => "Y"
 	)
 );?>
+				<?
+				$APPLICATION->ShowProperty("SIMPLECOMP");
+				$APPLICATION->ShowProperty("SIMPLECOMP2");
+				?>
 				<div class="content-block">
 					<div class="content-block-inner">
 						<h3><?=GetMessage('CFT_NEWS')?></h3>
