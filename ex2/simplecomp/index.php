@@ -12,7 +12,7 @@ $APPLICATION->SetTitle("Простой компонент");
 		"IBLOCK_CATALOG_ID" => "2",
 		"IBLOCK_NEWS_ID" => "1",
 		"PROPERTY_CATALOG_KEY" => "UF_NEWS_LINK",
-		"N_PAGE_SIZE" => ""
+		"N_PAGE_SIZE" => "2"
 	),
 	false
 );?><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

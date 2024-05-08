@@ -1,5 +1,7 @@
 <?
 use Bitrix\Main\EventManager;
+use Bitrix\Main\UserGroupTable;
+use Bitrix\Iblock\Elements\ElementMetatagTable;
 
 $eventManager = EventManager::getInstance();
 
@@ -78,7 +80,7 @@ $eventManager->addEventHandler("main", "OnBuildGlobalMenu", function(&$aGlobalMe
 		return;
 	}
 
-	$userGroups = \Bitrix\Main\UserGroupTable::getList(array(
+	$userGroups = UserGroupTable::getList(array(
 		"select" => ["GROUP_ID"],
 		"filter" => array("=USER_ID" => $USER->getId()),
 	))->fetchAll();
@@ -115,7 +117,7 @@ $eventManager->addEventHandler("main", "OnEpilog", function()
 
 	global $APPLICATION;
 
-	$metatag = \Bitrix\Iblock\Elements\ElementMetatagTable::getList([
+	$metatag = ElementMetatagTable::getList([
 		"select" => [
 			"TITLE_VALUE"       => "TITLE.VALUE",
 			"DESCRIPTION_VALUE" => "DESCRIPTION.VALUE",
@@ -135,4 +137,12 @@ $eventManager->addEventHandler("main", "OnEpilog", function()
 			);
 		}
 	}
+});
+
+$eventManager->addEventHandler("iblock", "OnAfterIBlockElementUpdate", function($arFields)
+{
+	if (SERVICES_IBLOCK_ID !== (int) $arFields["IBLOCK_ID"]) {
+		return;
+	}
+	CBitrixComponent::clearComponentCache("my:simplecomp.exam");
 });
