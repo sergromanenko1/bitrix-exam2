@@ -54,4 +54,10 @@ $this->setFrameMode(true);
 		}
 		?>
 	</ul>
+	<? if ($arParams["N_PAGE_SIZE"] && 1 < $arResult["NAV_OBJECT"]->getPageCount()) : ?>
+		<p>---</p>
+		<p>
+			<b><?= Loc::getMessage("NAV_TITLE"); ?></b>
+		</p>
+	<? endif; ?>
 <? endif; ?>

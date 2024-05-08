@@ -12,7 +12,8 @@ $APPLICATION->SetTitle("Простой компонет2");
 		"PROPERTY_LINK_KEY" => "FIRM",
 		"CACHE_TYPE" => "A",
 		"CACHE_TIME" => "36000000",
-		"PRODUCTS_IBLOCK_ID" => "2"
+		"PRODUCTS_IBLOCK_ID" => "2",
+		"N_PAGE_SIZE" => "2"
 	),
 	false
 );?><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

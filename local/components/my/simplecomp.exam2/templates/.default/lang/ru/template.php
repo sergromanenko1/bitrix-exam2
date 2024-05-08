@@ -1,2 +1,3 @@
 <?
-$MESS["SUBTITLE"] = "Каталог";
+$MESS["SUBTITLE"]  = "Каталог";
+$MESS["NAV_TITLE"] = "Навигация:";

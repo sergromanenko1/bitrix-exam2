@@ -47,3 +47,10 @@ $this->setFrameMode(true);
 		</li>
 	<? endforeach; ?>
 </ul>
+<? if (!empty($arResult["NAV_STRING"])) : ?>
+	<p>---</p>
+	<p>
+		<b><?= Loc::getMessage("NAV_TITLE"); ?></b>
+	</p>
+	<?= $arResult["NAV_STRING"]; ?>
+<? endif; ?>

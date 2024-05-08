@@ -10,7 +10,8 @@ $APPLICATION->SetTitle("Простой компонент3");
 		"IBLOCK_PROPERTY_AUTHOR_KEY" => "AUTHOR",
 		"NEWS_IBLOCK_ID" => "1",
 		"USER_PROPERTY_AUTHOR_TYPE_KEY" => "UF_AUTHOR_TYPE",
-		"COMPONENT_TEMPLATE" => ".default"
+		"COMPONENT_TEMPLATE" => ".default",
+		"N_PAGE_SIZE" => "1"
 	),
 	false
 );?><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

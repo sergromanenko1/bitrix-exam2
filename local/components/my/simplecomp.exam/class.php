@@ -7,9 +7,12 @@ use Bitrix\Iblock\ElementTable;
 use Bitrix\Iblock\Elements\ElementProductTable;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Context;
+use Bitrix\Main\UI\PageNavigation;
 
 class Simplecomp extends CBitrixComponent
 {
+	protected $pageNavigation;
+
 	public function executeComponent()
 	{
 		global $APPLICATION;
@@ -18,7 +21,9 @@ class Simplecomp extends CBitrixComponent
 			return;
 		}
 
-		if(Context::getCurrent()->getRequest()->get("F") || $this->startResultCache())
+		$this->setPageNavigation();
+
+		if(Context::getCurrent()->getRequest()->get("F") || $this->startResultCache(false, [$this->pageNavigation->getCurrentPage()]))
 		{
 			try {
 				$productSections = $this->getProductSections();
@@ -27,24 +32,26 @@ class Simplecomp extends CBitrixComponent
 				$this->arResult["COUNT"]       = count($products);
 				$this->arResult["PRICE_RANGE"] = $this->getProductPriceRange($products);
 				$this->arResult["ELEMENTS"]    = $this->getElements($productSections, $products);
+				$this->arResult["NAV_OBJECT"]  = $this->pageNavigation;
 			} catch (Exception) {
 				$this->abortResultCache();
 				ShowError(Loc::getMessage("WRONG_PARAMETERS"));
 				return;
 			}
 
-			$this->setResultCacheKeys(["COUNT", "ELEMENTS", "PRICE_RANGE"]);
+			$this->setResultCacheKeys(["COUNT", "ELEMENTS", "PRICE_RANGE", "NAV_OBJECT"]);
 			$this->includeComponentTemplate();
 		}
 
 		$this->setPanelButtons();
 		$APPLICATION->SetTitle(Loc::GetMessage("TITLE") . $this->arResult["COUNT"]);
 		$this->showPriceRange();
+		$this->showPageNavigation();
 	}
 
 	public function onPrepareComponentParams($arParams)
 	{
-		foreach (["IBLOCK_NEWS_ID", "IBLOCK_CATALOG_ID", "CACHE_TIME"] as $key) {
+		foreach (["IBLOCK_NEWS_ID", "IBLOCK_CATALOG_ID", "CACHE_TIME", "N_PAGE_SIZE"] as $key) {
 			$arParams[$key] = max(0, (int) $arParams[$key]);
 		}
 
@@ -61,8 +68,8 @@ class Simplecomp extends CBitrixComponent
 	}
 
 	protected function emptyParams() {
-		foreach ($this->arParams as $param) {
-			if (empty($param)) {
+		foreach ($this->arParams as $key => $param) {
+			if (false === strpos($key, "N_PAGE_SIZE") && empty($param)) {
 				ShowError(Loc::getMessage("WRONG_PARAMETERS"));
 				return true;
 			}
@@ -205,14 +212,22 @@ class Simplecomp extends CBitrixComponent
 		}
 		$news = array_unique($news);
 
+		$filter = [
+			"=ACTIVE"    => "Y",
+			"=IBLOCK_ID" => $this->arParams["IBLOCK_NEWS_ID"],
+			"=ID"        => $news,
+		];
+
 		$news = ElementTable::getList([
 			"select" => ["ID", "NAME", "ACTIVE_FROM"],
-			"filter" => [
-				"=ACTIVE"    => "Y",
-				"=IBLOCK_ID" => $this->arParams["IBLOCK_NEWS_ID"],
-				"=ID"        => $news,
-			]
+			"filter" => $filter,
+			'limit'  => $this->pageNavigation->getLimit(),
+			'offset' => $this->pageNavigation->getOffset(),
 		])->fetchAll();
+
+		if ($this->arParams["N_PAGE_SIZE"]) {
+			$this->pageNavigation->setRecordCount(ElementTable::getCount($filter));
+		}
 
 		foreach ($news as &$newsItem) {
 			$newsProductSections = array_filter($productSections, function($productSection) use ($newsItem) {
@@ -248,6 +263,29 @@ class Simplecomp extends CBitrixComponent
 					(int) $this->arResult["PRICE_RANGE"]["MAX"],
 					(int) $this->arResult["PRICE_RANGE"]["MIN"]
 				),
+			);
+		}
+	}
+
+	protected function setPageNavigation()
+	{
+		$this->pageNavigation = new PageNavigation("news-nav");
+		$this->pageNavigation->setPageSize($this->arParams["N_PAGE_SIZE"])->initFromUri();
+	}
+
+	protected function showPageNavigation()
+	{
+		global $APPLICATION;
+
+		if ($this->arParams["N_PAGE_SIZE"] && 1 < $this->arResult["NAV_OBJECT"]->getPageCount()) {
+			$APPLICATION->IncludeComponent(
+				"bitrix:main.pagenavigation",
+				"",
+				array(
+					"NAV_OBJECT" => $this->arResult["NAV_OBJECT"],
+					"SEF_MODE"   => "N",
+				),
+				false
 			);
 		}
 	}

@@ -5,9 +5,11 @@ use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\UserTable;
 use Bitrix\Iblock\Elements\ElementNewsTable;
 use Bitrix\Main\Loader;
+use Bitrix\Main\UI\PageNavigation;
 
 class Simplecomp3 extends CBitrixComponent
 {
+	protected $pageNavigation;
 	protected $userId;
 
 	public function executeComponent()
@@ -20,26 +22,30 @@ class Simplecomp3 extends CBitrixComponent
 			return;
 		}
 
-		if ($this->startResultCache(false, $this->userId)) {
+		$this->setPageNavigation();
+
+		if ($this->startResultCache(false, [$this->userId, $this->pageNavigation->getCurrentPage()])) {
 			try {
-				$this->arResult["ELEMENTS"] = $this->getElements();
+				$this->arResult["ELEMENTS"]   = $this->getElements();
+				$this->arResult["NAV_OBJECT"] = $this->pageNavigation;
 			} catch (Exception) {
 				$this->abortResultCache();
 				ShowError(Loc::getMessage("WRONG_PARAMETERS"));
 				return;
 			}
 
-			$this->setResultCacheKeys(["COUNT_NEWS", "ELEMENTS"]);
+			$this->setResultCacheKeys(["COUNT_NEWS", "ELEMENTS", "NAV_OBJECT"]);
 			$this->includeComponentTemplate();
 		}
 
 		$this->setPanelButtons();
 		$APPLICATION->SetTitle(Loc::getMessage("TITLE") . $this->arResult["COUNT_NEWS"]);
+		$this->showPageNavigation();
 	}
 
 	public function onPrepareComponentParams($arParams)
 	{
-		foreach (["NEWS_IBLOCK_ID", "CACHE_TIME"] as $key) {
+		foreach (["NEWS_IBLOCK_ID", "CACHE_TIME", "N_PAGE_SIZE"] as $key) {
 			$arParams[$key] = max(0, (int) $arParams[$key]);
 		}
 
@@ -64,8 +70,8 @@ class Simplecomp3 extends CBitrixComponent
 	}
 
 	protected function emptyParams() {
-		foreach ($this->arParams as $param) {
-			if (empty($param)) {
+		foreach ($this->arParams as $key => $param) {
+			if (false === strpos($key, "N_PAGE_SIZE") && empty($param)) {
 				ShowError(Loc::getMessage("WRONG_PARAMETERS"));
 				return true;
 			}
@@ -107,22 +113,31 @@ class Simplecomp3 extends CBitrixComponent
 	}
 
 	protected function getAuthors() {
-		$authors = UserTable::getList([
-			"select" => ["ID", "LOGIN", "{$this->arParams['USER_PROPERTY_AUTHOR_TYPE_KEY']}"],
+		$authorType = UserTable::getList([
+			"select" => ["{$this->arParams['USER_PROPERTY_AUTHOR_TYPE_KEY']}"],
 			"filter" => [
-				"=ACTIVE"                                              => "Y",
-				"!={$this->arParams['USER_PROPERTY_AUTHOR_TYPE_KEY']}" => false,
+				"=ACTIVE" => "Y",
+				"=ID"     => $this->userId,
 			],
+		])->fetch();
+		$authorType = $authorType ? array_values($authorType)[0] : (int) $authorType;
+
+		$filter = [
+			"=ACTIVE"                                             => "Y",
+			"={$this->arParams['USER_PROPERTY_AUTHOR_TYPE_KEY']}" => $authorType,
+			"!=ID"                                                => $this->userId,
+		];
+
+		$authors = UserTable::getList([
+			"select" => ["ID", "LOGIN"],
+			"filter" => $filter,
+			'limit'  => $this->pageNavigation->getLimit(),
+			'offset' => $this->pageNavigation->getOffset(),
 		])->fetchAll();
 
-		$currentAuthor = array_filter($authors, function($author) {
-			return $this->userId === $author["ID"];
-		});
-		$currentAuthor = array_shift($currentAuthor);
-
-		$authors = array_filter($authors, function($author) use ($currentAuthor) {
-			return $currentAuthor["ID"] !== $author["ID"] && $currentAuthor["UF_AUTHOR_TYPE"] === $author["UF_AUTHOR_TYPE"];
-		});
+		if ($this->arParams["N_PAGE_SIZE"]) {
+			$this->pageNavigation->setRecordCount(UserTable::getCount($filter));
+		}
 
 		return $authors;
 	}
@@ -194,5 +209,28 @@ class Simplecomp3 extends CBitrixComponent
 		}
 
 		return $authors;
+	}
+
+	protected function setPageNavigation()
+	{
+		$this->pageNavigation = new PageNavigation("news-nav");
+		$this->pageNavigation->setPageSize($this->arParams["N_PAGE_SIZE"])->initFromUri();
+	}
+
+	protected function showPageNavigation()
+	{
+		global $APPLICATION;
+
+		if ($this->arParams["N_PAGE_SIZE"] && 1 < $this->arResult["NAV_OBJECT"]->getPageCount()) {
+			$APPLICATION->IncludeComponent(
+				"bitrix:main.pagenavigation",
+				"",
+				array(
+					"NAV_OBJECT" => $this->arResult["NAV_OBJECT"],
+					"SEF_MODE"   => "N",
+				),
+				false
+			);
+		}
 	}
 }

@@ -14,7 +14,7 @@ class Simplecomp2 extends CBitrixComponent
 			return;
 		}
 
-		if($this->startResultCache(false, $USER->GetGroups())) {
+		if($this->startResultCache(false, [$USER->GetGroups(), CDBResult::GetNavParams($this->arParams["N_PAGE_SIZE"])])) {
 			try {
 				$products = $this->getProducts();
 			
@@ -38,7 +38,7 @@ class Simplecomp2 extends CBitrixComponent
 
 	public function onPrepareComponentParams($arParams)
 	{
-		foreach (["PRODUCTS_IBLOCK_ID", "CLASSIFICATOR_IBLOCK_ID", "CACHE_TIME"] as $key) {
+		foreach (["PRODUCTS_IBLOCK_ID", "CLASSIFICATOR_IBLOCK_ID", "N_PAGE_SIZE", "CACHE_TIME"] as $key) {
 			$arParams[$key] = max(0, (int) $arParams[$key]);
 		}
 
@@ -55,8 +55,8 @@ class Simplecomp2 extends CBitrixComponent
 	}
 
 	protected function emptyParams() {
-		foreach ($this->arParams as $param) {
-			if (empty($param)) {
+		foreach ($this->arParams as $key => $param) {
+			if (false === strpos($key, "N_PAGE_SIZE") && empty($param)) {
 				ShowError(Loc::getMessage("WRONG_PARAMETERS"));
 				return true;
 			}
@@ -103,12 +103,16 @@ class Simplecomp2 extends CBitrixComponent
 			[],
 			$params["filter"] ?? [],
 			false,
-			false,
+			$params["nav"] ?? false,
 			$params["select"] ?? []
 		);
 		
 		if (array_search("DETAIL_PAGE_URL", $params["select"])) {
 			$result->SetUrlTemplates($this->arParams["DETAIL_URL"]);
+		}
+
+		if (!empty($params["nav"])) {
+			$this->arResult["NAV_STRING"] = $result->GetPageNavStringEx($navComponentObject, Loc::getMessage("NAV_SUBTITLE"));
 		}
 
 		$elements = [];
@@ -185,15 +189,23 @@ class Simplecomp2 extends CBitrixComponent
 			return [];
 		}
 
-		$firms = $this->getItems([
+		$firmParams = [
 			"filter" => [
 				"ACTIVE"            => "Y",
 				"CHECK_PERMISSIONS" => "Y",
-				"IBLOCK_ID"         => $this->arParams['CLASSIFICATOR_IBLOCK_ID'],
+				"IBLOCK_ID"         => $this->arParams["CLASSIFICATOR_IBLOCK_ID"],
 				"ID"                => $firmIds,
 			],
 			"select" => ["ID", "NAME"],
-		]);
+		];
+
+		if (!empty($this->arParams["N_PAGE_SIZE"])) {
+			$firmParams["nav"] = [
+				"nPageSize" => $this->arParams["N_PAGE_SIZE"],
+			];
+		}
+
+		$firms = $this->getItems($firmParams);
 
 		foreach ($firms as &$firm) {
 			$firm["PRODUCTS"] = [];

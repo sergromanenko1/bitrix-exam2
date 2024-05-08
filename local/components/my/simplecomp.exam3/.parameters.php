@@ -20,6 +20,11 @@ $arComponentParameters = array(
 			"NAME"   => Loc::getMessage("USER_PROPERTY_AUTHOR_TYPE_KEY"),
 			"TYPE"   => "STRING",
 		],
+		"N_PAGE_SIZE" => [
+			"NAME"   => Loc::getMessage('N_PAGE_SIZE'),
+			"PARENT" => "BASE",
+			"TYPE"   => "STRING",
+		],
 		"CACHE_TIME"  => [
 			"DEFAULT"=>36000000
 		],

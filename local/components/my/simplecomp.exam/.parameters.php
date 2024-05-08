@@ -25,6 +25,11 @@ $arComponentParameters = [
 			"NAME"   => Loc::GetMessage("DETAIL_PAGE_URL"),
 			"TYPE"   => "STRING",
 		],
+		"N_PAGE_SIZE" => [
+			"NAME"   => Loc::getMessage('N_PAGE_SIZE'),
+			"PARENT" => "BASE",
+			"TYPE"   => "STRING",
+		],
 		"CACHE_TIME" => [
 			"DEFAULT" => 36000000
 		],
