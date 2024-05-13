@@ -94,17 +94,36 @@ $APPLICATION->IncludeFile(
 		<div id="content">
 		
 			<div id="sidebar">
-<?$APPLICATION->IncludeComponent("bitrix:menu", "left", array(
-	"ROOT_MENU_TYPE" => "left",
-	"MENU_CACHE_TYPE" => "A",
-	"MENU_CACHE_TIME" => "36000000",
-	"MENU_CACHE_USE_GROUPS" => "Y",
-	"MENU_CACHE_GET_VARS" => array(
-	),
-	"MAX_LEVEL" => "1",
-	"CHILD_MENU_TYPE" => "left",
-	"USE_EXT" => "Y",
-	"ALLOW_MULTI_SELECT" => "N"
+			<div class="content-block">
+				<div class="content-block-inner">
+					<h3><?=GetMessage('CFT_LANG_CANGE')?></h3>
+					<?$APPLICATION->IncludeComponent("bitrix:main.site.selector", "template1", Array(
+						"CACHE_TIME" => "36000000",	// Cache time (sec.)
+							"CACHE_TYPE" => "A",	// Cache type
+							"SITE_LIST" => array(	// Sites List
+								0 => "*all*",
+							)
+						),
+						false
+					);?>
+				</div>
+			</div>
+<?$APPLICATION->IncludeComponent(
+	"bitrix:menu", 
+	"left", 
+	array(
+		"ROOT_MENU_TYPE" => "left",
+		"MENU_CACHE_TYPE" => "N",
+		"MENU_CACHE_TIME" => "36000000",
+		"MENU_CACHE_USE_GROUPS" => "Y",
+		"MENU_CACHE_GET_VARS" => array(
+		),
+		"MAX_LEVEL" => "1",
+		"CHILD_MENU_TYPE" => "left",
+		"USE_EXT" => "Y",
+		"ALLOW_MULTI_SELECT" => "N",
+		"COMPONENT_TEMPLATE" => "left",
+		"DELAY" => "Y"
 	),
 	false,
 	array(
