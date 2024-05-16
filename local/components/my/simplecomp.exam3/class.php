@@ -34,7 +34,7 @@ class Simplecomp3 extends CBitrixComponent
 				return;
 			}
 
-			$this->setResultCacheKeys(["COUNT_NEWS", "ELEMENTS", "NAV_OBJECT"]);
+			$this->setResultCacheKeys(["COUNT_NEWS", "NAV_OBJECT"]);
 			$this->includeComponentTemplate();
 		}
 
