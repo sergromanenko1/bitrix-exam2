@@ -21,18 +21,13 @@ class Simplecomp2 extends CBitrixComponent
 				$this->arResult["ELEMENTS"]    = $this->getElements($products);
 				$this->arResult["PRICE_RANGE"] = $this->getProductPriceRange($products);
 				$this->arResult["COUNT"]       = count($this->arResult["ELEMENTS"]);
-
-				// Dublicate keys for test cache size
-				$this->arResult["ELEMENTS2"]    = $this->getElements($products);
-				$this->arResult["PRICE_RANGE2"] = $this->getProductPriceRange($products);
-				$this->arResult["COUNT2"]       = count($this->arResult["ELEMENTS"]);
 			} catch (Exception) {
 				$this->abortResultCache();
 				ShowError(Loc::getMessage("WRONG_PARAMETERS"));
 				return;
 			}
 
-			$this->setResultCacheKeys(["COUNT", "ELEMENTS", "PRICE_RANGE"]);
+			$this->setResultCacheKeys(["COUNT", "PRICE_RANGE"]);
 			$this->includeComponentTemplate();
 		}
 
