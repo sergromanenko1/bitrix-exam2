@@ -39,7 +39,7 @@ class Simplecomp extends CBitrixComponent
 				return;
 			}
 
-			$this->setResultCacheKeys(["COUNT", "ELEMENTS", "PRICE_RANGE", "NAV_OBJECT"]);
+			$this->setResultCacheKeys(["COUNT", "PRICE_RANGE", "NAV_OBJECT"]);
 			$this->includeComponentTemplate();
 		}
 
