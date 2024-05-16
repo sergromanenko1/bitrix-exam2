@@ -2,10 +2,10 @@
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 $APPLICATION->SetTitle("Furniture company");
 ?><?$APPLICATION->IncludeComponent(
-	"bitrix:news.list",
-	"template1",
-	Array(
-		"ACTIVE_DATE_FORMAT" => "",
+	"bitrix:news.list", 
+	"template1", 
+	array(
+		"ACTIVE_DATE_FORMAT" => "SHORT",
 		"ADD_SECTIONS_CHAIN" => "Y",
 		"AJAX_MODE" => "N",
 		"AJAX_OPTION_ADDITIONAL" => "",
@@ -25,7 +25,10 @@ $APPLICATION->SetTitle("Furniture company");
 		"DISPLAY_PICTURE" => "Y",
 		"DISPLAY_PREVIEW_TEXT" => "Y",
 		"DISPLAY_TOP_PAGER" => "N",
-		"FIELD_CODE" => array(0=>"",1=>"",),
+		"FIELD_CODE" => array(
+			0 => "",
+			1 => "",
+		),
 		"FILTER_NAME" => "",
 		"HIDE_LINK_WHEN_NO_DETAIL" => "N",
 		"IBLOCK_ID" => "1",
@@ -44,7 +47,11 @@ $APPLICATION->SetTitle("Furniture company");
 		"PARENT_SECTION" => "",
 		"PARENT_SECTION_CODE" => "",
 		"PREVIEW_TRUNCATE_LEN" => "",
-		"PROPERTY_CODE" => array(0=>"ANONCE_EN",1=>"NAME_EN",2=>"",),
+		"PROPERTY_CODE" => array(
+			0 => "ANONCE_EN",
+			1 => "NAME_EN",
+			2 => "",
+		),
 		"SET_BROWSER_TITLE" => "Y",
 		"SET_LAST_MODIFIED" => "N",
 		"SET_META_DESCRIPTION" => "Y",
@@ -57,5 +64,6 @@ $APPLICATION->SetTitle("Furniture company");
 		"SORT_ORDER1" => "DESC",
 		"SORT_ORDER2" => "ASC",
 		"STRICT_SECTION_CHECK" => "N"
-	)
+	),
+	false
 );?><br><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

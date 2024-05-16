@@ -1,4 +1,9 @@
-<?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();?>
+<?
+if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true)die();
+
+use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\Text\HtmlFilter;
+?>
 <div class="news-detail">
 	<?if($arParams["DISPLAY_PICTURE"]!="N" && is_array($arResult["DETAIL_PICTURE"])):?>
 		<img class="detail_picture" src="<?=$arResult["DETAIL_PICTURE"]["SRC"]?>" width="<?=$arResult["DETAIL_PICTURE"]["WIDTH"]?>" height="<?=$arResult["DETAIL_PICTURE"]["HEIGHT"]?>" alt="<?=$arResult["NAME"]?>"  title="<?=$arResult["NAME"]?>" />
@@ -40,3 +45,14 @@
 	<?endforeach;?>
 	</div>
 </div>
+<?
+$curPage = $APPLICATION->GetCurPage();
+
+printf(
+	'<a href="%s" id="complaint" data-message="%s" data-error="%s" data-ajax="%s">%s</a>',
+	$curPage . (false !== strpos($curPage, "?") ? "&" : "?") . "complain=Y",
+	HtmlFilter::encode(Loc::getMessage("COMPLAINT_TEXT")),
+	HtmlFilter::encode(Loc::getMessage("ERROR")),
+	HtmlFilter::encode($arParams["COMPLAINT_AJAX"]),
+	HtmlFilter::encode(Loc::getMessage("COMPLAINT_LINK_TEXT")),
+);

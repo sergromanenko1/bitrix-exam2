@@ -16,5 +16,11 @@ $arTemplateParameters = array(
 		"NAME" => GetMessage("CANONICAL_IBLOCK_ID"),
 		"TYPE" => "STRRING",
 	),
+	"COMPLAINT_AJAX" => Array(
+		"PARENT" => "DETAIL_SETTINGS",
+		"NAME" => GetMessage("COMPLAINT_AJAX"),
+		"TYPE" => "CHECKBOX",
+		"DEFAULT" => "Y",
+	),
 );
 ?>
